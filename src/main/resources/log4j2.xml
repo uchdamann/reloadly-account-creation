@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+	<Properties>
+		<Property name="LOG_PATTERN">
+			%d{E dd-MMM-yyyy HH:mm:ss} %-5p - [%15.4t] %-25c{0} : %m%n%ex
+		</Property>
+		<Property name="ROOT_DIR" value="${bundle:application-dev:app.prop.log-dir}" />
+	</Properties>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console> 
+
+        <RollingFile name="RollingFile"
+            fileName="${ROOT_DIR}/res-server-log/account_creation_app_res_server.log"
+            filePattern="${ROOT_DIR}/res-server-log/account_creation_app_res_server-%d{dd-MM-yyyy}-%i.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB" />
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <AsyncLogger name="com.reloadly.devops" level="info" additivity="false">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="RollingFile" />
+        </AsyncLogger>
+        <Root level="info" additivity="false">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="RollingFile" />
+        </Root>
+    </Loggers>
+</Configuration>
