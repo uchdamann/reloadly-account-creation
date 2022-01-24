@@ -31,7 +31,7 @@ import com.reloadly.devops.utilities.UtilitiesAndTweaks;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 @Validated
 @RestController
-@RequestMapping("api/v1")
+@RequestMapping("api/account-management/v1")
 @SecurityRequirement(name = "ChannelCode")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class HomeController {

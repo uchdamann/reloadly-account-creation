@@ -11,11 +11,13 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.reloadly.devops.utilities.AppProperties;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @EnableAsync
 @Configuration
+@RequiredArgsConstructor
 public class AsyncConfig implements AsyncConfigurer {
 	@Autowired
 	private AppProperties prop;
