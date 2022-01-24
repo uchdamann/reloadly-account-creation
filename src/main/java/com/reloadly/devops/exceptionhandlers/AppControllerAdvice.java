@@ -68,8 +68,8 @@ public class AppControllerAdvice {
 	}
 	
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	@ExceptionHandler(InvalidAgeException.class)
-	public ResponseDTO<String> handleInvalidAgeException(InvalidAgeException ex){
+	@ExceptionHandler(InvalidAccountNumberException.class)
+	public ResponseDTO<String> handleInvalidAccountNumberException(InvalidAccountNumberException ex){
 		return new ResponseDTO<>(FAILURE.getCode(), FAILURE.getMessage(), ex.getMessage());
 	}
 

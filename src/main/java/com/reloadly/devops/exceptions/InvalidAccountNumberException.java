@@ -5,7 +5,7 @@ import java.io.Serializable;
 public class InvalidAccountNumberException extends RuntimeException implements Serializable {
 	
 	private static final long serialVersionUID = 6479485452836052090L;
-	private static final String MESSAGE="Account number must be ten digits";
+	private static final String MESSAGE="Account number is invalid";
 	
 	public InvalidAccountNumberException()
     {

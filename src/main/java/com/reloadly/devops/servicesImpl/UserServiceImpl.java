@@ -19,15 +19,14 @@ import com.reloadly.devops.repositories.ContactInfoRepo;
 import com.reloadly.devops.repositories.PersonalInfoRepo;
 import com.reloadly.devops.repositories.UserRepo;
 import com.reloadly.devops.request.dtos.AccountOpeningDTO;
-import com.reloadly.devops.request.dtos.AccountUpdateDTO;
 import com.reloadly.devops.request.dtos.AddressDTO;
 import com.reloadly.devops.request.dtos.ContactInfoDTO;
 import com.reloadly.devops.request.dtos.LoginDetailsDTO;
 import com.reloadly.devops.request.dtos.PersonalInfoDTO;
+import com.reloadly.devops.request.dtos.UpdateBalanceDTO;
 import com.reloadly.devops.response.dtos.CreatedAccountDTO;
 import com.reloadly.devops.response.dtos.OauthDTO;
 import com.reloadly.devops.response.dtos.ResponseDTO;
-import com.reloadly.devops.response.dtos.UpdatedAccountDTO;
 import com.reloadly.devops.services.UserService;
 import com.reloadly.devops.transformers.ConverterUtil;
 import com.reloadly.devops.utilities.AccountCreationUtil;
@@ -117,9 +116,13 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public ResponseDTO<UpdatedAccountDTO> updateAccount(AccountUpdateDTO accountUpdate) {
-		// TODO Auto-generated method stub
-		return null;
+	public ResponseDTO<String> updateAccount(UpdateBalanceDTO updateBalanceDTO) {
+		
+		AccountDetails accountDetails = accountDetailsRepo.findByAccountNumber(updateBalanceDTO.getAccountNumber()).get();
+		accountDetails.setBalance(updateBalanceDTO.getAmount());
+		accountDetails = accountDetailsRepo.save(accountDetails);
+				
+		return new ResponseDTO<>(SUCCESSFUL.getCode(), SUCCESSFUL.getMessage(), "Yes");
 	}
 
 	@Override

@@ -22,5 +22,4 @@ public abstract class CommonFields{
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date updatedOn=new Date();
 	private Boolean isActive=true;
-
 }

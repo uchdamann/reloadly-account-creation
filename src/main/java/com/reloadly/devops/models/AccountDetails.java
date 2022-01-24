@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.OneToOne;
+import javax.persistence.Version;
 
 import com.reloadly.devops.constants.AccountType;
 
@@ -30,4 +31,6 @@ public class AccountDetails extends CommonFields implements Serializable {
 	private AccountType accountType;
 	@OneToOne
 	private User user;
+	@Version
+	private Long version;
 }
