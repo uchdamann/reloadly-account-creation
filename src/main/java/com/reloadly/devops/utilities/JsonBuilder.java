@@ -27,6 +27,7 @@ public class JsonBuilder {
 	}
 	
 	public static <T> T toClassTypeReference(String json, TypeReference<T> type) {
+		log.info("---->>>> Start parsing JSON to object");
         T target = null;
         ObjectMapper objectMapper = new ObjectMapper();
 

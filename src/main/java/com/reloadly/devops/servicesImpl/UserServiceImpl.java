@@ -27,6 +27,7 @@ import com.reloadly.devops.request.dtos.UpdateBalanceDTO;
 import com.reloadly.devops.response.dtos.CreatedAccountDTO;
 import com.reloadly.devops.response.dtos.OauthDTO;
 import com.reloadly.devops.response.dtos.ResponseDTO;
+import com.reloadly.devops.response.dtos.UpdatedAccountDTO;
 import com.reloadly.devops.services.UserService;
 import com.reloadly.devops.transformers.ConverterUtil;
 import com.reloadly.devops.utilities.AccountCreationUtil;
@@ -63,23 +64,30 @@ public class UserServiceImpl implements UserService {
 	@Transactional
 	public ResponseDTO<CreatedAccountDTO> createAccount(AccountOpeningDTO accountOpeningDTO) {
 		
+		log.info("--->> Commencing account creation process");
 		User user = converterUtil.conv_AccountOpeningDTO_User(accountOpeningDTO);
 		user = userRepo.save(user);
+		log.info("--->> Saved user details of " + user.getUsername());
 		
 		ContactInfo contactInfo = createContactInfo(accountOpeningDTO.getContactInfoDTO(), user).get();
 		contactInfo = contactInfoRepo.save(contactInfo);
+		log.info("--->> Saved contact details of " + user.getUsername());
 		
 		PersonalInfo personalInfo = createPersonalInfo(accountOpeningDTO.getPersonalInfoDTO(), user).get();
 		personalInfo = personalInfoRepo.save(personalInfo);
+		log.info("--->> Saved personal details of " + user.getUsername());
 		
 		Address address = createAddressInfo(accountOpeningDTO.getContactInfoDTO().getAddressDTO(), contactInfo).get();
 		address = addressRepo.save(address);
+		log.info("--->> Saved address details of " + user.getUsername());
 		
 		String accountNumber = accountCreationUtil.accountNumber();
+		log.info("--->> Generated account number: " + accountNumber);
 		AccountDetails accountDetails = converterUtil.conv_AccountOpeningDTO_AccountDetails(accountOpeningDTO);
 		accountDetails.setAccountNumber(accountNumber);
 		accountDetails.setUser(user);
 		accountDetails = accountDetailsRepo.save(accountDetails);
+		log.info("--->> Saved account details of " + user.getUsername());
 		
 		CreatedAccountDTO createdAccountDTO = CreatedAccountDTO.builder()
 				.username(user.getUsername())
@@ -116,13 +124,18 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public ResponseDTO<String> updateAccount(UpdateBalanceDTO updateBalanceDTO) {
+	@Transactional
+	public ResponseDTO<UpdatedAccountDTO> updateAccount(UpdateBalanceDTO updateBalanceDTO) {
+		UpdatedAccountDTO updatedAccountDTO = new UpdatedAccountDTO();
 		
 		AccountDetails accountDetails = accountDetailsRepo.findByAccountNumber(updateBalanceDTO.getAccountNumber()).get();
 		accountDetails.setBalance(updateBalanceDTO.getAmount());
 		accountDetails = accountDetailsRepo.save(accountDetails);
+		
+		updatedAccountDTO.setUsername(accountDetails.getUser().getUsername());
+		updatedAccountDTO.setFirstName(accountDetails.getUser().getPersonalInfo().getFirstName());
 				
-		return new ResponseDTO<>(SUCCESSFUL.getCode(), SUCCESSFUL.getMessage(), "Yes");
+		return new ResponseDTO<>(SUCCESSFUL.getCode(), SUCCESSFUL.getMessage(), updatedAccountDTO);
 	}
 
 	@Override
@@ -145,4 +158,5 @@ public class UserServiceImpl implements UserService {
 		return new ResponseDTO<>(SUCCESSFUL.getCode(), SUCCESSFUL.getMessage(), 
 				extCalls.generateAuthServeTokenPasswordGrantType(loginDetailsDTO.getUsername(), loginDetailsDTO.getPassword()));
 	}
+	
 }

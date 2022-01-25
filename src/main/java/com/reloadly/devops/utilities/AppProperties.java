@@ -20,8 +20,8 @@ public class AppProperties {
 	private int maxPoolSize;
 	private int corePoolSize;
 	private String encryptKey;
-	private String authServerUrl;
 	private String webChannelCode;
 	private String mobileConsumerChannelCode;
 	private int tokenExpiry;
+	private String authServerUrl;
 }

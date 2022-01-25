@@ -11,7 +11,6 @@ import org.springframework.validation.annotation.Validated;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,10 +28,14 @@ import com.reloadly.devops.request.dtos.UpdateBalanceDTO;
 import com.reloadly.devops.response.dtos.CreatedAccountDTO;
 import com.reloadly.devops.response.dtos.OauthDTO;
 import com.reloadly.devops.response.dtos.ResponseDTO;
+import com.reloadly.devops.response.dtos.UpdatedAccountDTO;
 import com.reloadly.devops.services.UserService;
 import com.reloadly.devops.utilities.UtilitiesAndTweaks;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Validated
 @RestController
 @RequestMapping("api/account-management/v1")
@@ -51,20 +54,23 @@ public class HomeController {
 	@PostMapping("/create-account")
 	public ResponseDTO<CreatedAccountDTO> createAccount(@RequestBody @Valid AccountOpeningDTO accountOpeningDTO, 
 			HttpServletRequest req){
+		log.info("--->> Initializing account creation");
 		util.channelCodeHandler(req);
 		
 		return userService.createAccount(accountOpeningDTO);
 	}
 	
 	@PostMapping("/login")
-	public ResponseDTO<OauthDTO> login(@RequestBody @Valid LoginDetailsDTO loginDetailsDTo,	HttpServletRequest req){
+	public ResponseDTO<OauthDTO> login(@RequestBody @Valid LoginDetailsDTO loginDetailsDTO,	HttpServletRequest req){
+		log.info("--->> Initializing user login");
 		util.channelCodeHandler(req);
 		
-		return userService.login(loginDetailsDTo);
+		return userService.login(loginDetailsDTO);
 	}
 	
-	@GetMapping("/validate-user/{username}")
+	@GetMapping("/getfirstname/{username}")
 	public Map<String, Object> validateUser(@PathVariable String username, HttpServletRequest req) {
+		log.info("--->> Initializing user validation by username");
 		util.channelCodeHandler(req);
 		Map<String, Object> map = new HashMap<>();
 		User user = userRepo.findByUsername(username).orElseThrow(() -> new InvalidUserException());
@@ -74,8 +80,9 @@ public class HomeController {
 		return map;
 	}
 	
-	@GetMapping("/validate-account-number/{accountNumber}")
+	@GetMapping("/getbalance/{accountNumber}")
 	public Map<String, Object> validateAccountNumber(@PathVariable String accountNumber, HttpServletRequest req) {
+		log.info("--->> Initializing user validation by account number");
 		util.channelCodeHandler(req);
 		Map<String, Object> map = new HashMap<>();
 		AccountDetails accountDetails = accountDetailsRepo.findByAccountNumber(accountNumber)
@@ -84,14 +91,15 @@ public class HomeController {
 		map.put("balance", accountDetails.getBalance());
 		
 		return map;
-	}	
+	}
 	
-	@PatchMapping("/update-balance")
-	public ResponseDTO<String> updateBalance(@RequestBody UpdateBalanceDTO updateBalanceDTO, 
+	@PostMapping("/update-balance")
+	public ResponseDTO<UpdatedAccountDTO> updateBalance(@RequestBody UpdateBalanceDTO updateBalanceDTO, 
 			HttpServletRequest req) {
+		log.info("--->> Initializing update of account balance");
 		util.channelCodeHandler(req);
 		
 		return userService.updateAccount(updateBalanceDTO);
-	}	
+	}
 	
 }

@@ -7,6 +7,9 @@ import org.springframework.stereotype.Component;
 
 import com.reloadly.devops.repositories.AccountDetailsRepo;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 public class AccountCreationUtil {
 	@Autowired
@@ -15,6 +18,7 @@ public class AccountCreationUtil {
 	private AccountDetailsRepo accountDetailsRepo;
 		
 	public String generateAccountNumber() {
+		log.info("--->> Initializing account number generation");
 		StringBuilder sb = new StringBuilder();
 		SecureRandom random = new SecureRandom();
 		char[] accountNumberArray = prop.getAccountCharacters().toCharArray();

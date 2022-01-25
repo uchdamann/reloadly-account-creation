@@ -15,12 +15,13 @@ import com.reloadly.devops.request.dtos.UpdateBalanceDTO;
 import com.reloadly.devops.response.dtos.CreatedAccountDTO;
 import com.reloadly.devops.response.dtos.OauthDTO;
 import com.reloadly.devops.response.dtos.ResponseDTO;
+import com.reloadly.devops.response.dtos.UpdatedAccountDTO;
 
 public interface UserService {
 	public ResponseDTO<CreatedAccountDTO> createAccount(AccountOpeningDTO accountOpeningDTO);
 	public Optional<ContactInfo> createContactInfo(ContactInfoDTO contactInfoDTO, User user);
 	public Optional<PersonalInfo> createPersonalInfo(PersonalInfoDTO personalInfoDTO, User user);
 	public Optional<Address> createAddressInfo(AddressDTO addressDTO, ContactInfo contactInfo);
-	public ResponseDTO<String> updateAccount(UpdateBalanceDTO updateBalanceDTO);
+	public ResponseDTO<UpdatedAccountDTO> updateAccount(UpdateBalanceDTO updateBalanceDTO);
 	public ResponseDTO<OauthDTO> login(LoginDetailsDTO loginDetailsDTo);
 }

@@ -47,7 +47,7 @@ public class ExternalCalls {
 		requestBody.put("username", Arrays.asList(username));
 		requestBody.put("password", Arrays.asList(password));
 
-		log.info("Auth-server request: {}", requestBody);
+		log.info("---->>> Auth-server request: {}", requestBody);
 
 		HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody, requestHeader);
 		ResponseEntity<String> response = restTemplate.postForEntity(props.getAuthServerUrl(), requestEntity,

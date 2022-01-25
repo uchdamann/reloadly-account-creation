@@ -40,7 +40,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter
     		.csrf().disable()
     		.authorizeRequests()
 			.antMatchers("/", "/index", "/v3/api-docs/**", "/swagger-resources/**", "/swagger-ui/**",
-				"/swagger-ui.html","/webjars/**","/resources/**", "/api/v1/**").permitAll()
+				"/swagger-ui.html","/webjars/**","/resources/**", "/api/account-management/v1/**").permitAll()
 			.anyRequest().authenticated()
 			
 			.and().sessionManagement()
