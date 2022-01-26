@@ -39,10 +39,10 @@ public class UtilitiesAndTweaks {
 				throw new AppException("Access code is invalid"); // Access code is my ChannelCode
 			}
 		} 
-//		else {
-//			log.info("---->>> Error:  Access code cannot be empty, blank or null");
-//			throw new AppException("Access code cannot be empty");
-//		}
+		else {
+			log.info("---->>> Error:  Access code cannot be empty, blank or null");
+			throw new AppException("Access code cannot be empty");
+		}
 	}
 
 	public User checkAuthentication(HttpServletRequest req) {

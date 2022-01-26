@@ -22,6 +22,7 @@ public class AppProperties {
 	private String encryptKey;
 	private String webChannelCode;
 	private String mobileConsumerChannelCode;
+	private String mailNotificationUrl;
 	private int tokenExpiry;
 	private String authServerUrl;
 }

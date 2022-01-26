@@ -1,11 +1,13 @@
 package com.reloadly.devops.servicesImpl;
 
+import java.util.Date;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.reloadly.devops.constants.NotificationType.*;
 
 import com.reloadly.devops.exceptions.AppException;
 import com.reloadly.devops.models.AccountDetails;
@@ -18,52 +20,49 @@ import com.reloadly.devops.repositories.AddressRepo;
 import com.reloadly.devops.repositories.ContactInfoRepo;
 import com.reloadly.devops.repositories.PersonalInfoRepo;
 import com.reloadly.devops.repositories.UserRepo;
+import com.reloadly.devops.request.dtos.AccountCreationNotificationDTO;
 import com.reloadly.devops.request.dtos.AccountOpeningDTO;
 import com.reloadly.devops.request.dtos.AddressDTO;
 import com.reloadly.devops.request.dtos.ContactInfoDTO;
 import com.reloadly.devops.request.dtos.LoginDetailsDTO;
+import com.reloadly.devops.request.dtos.LoginNotificationDTO;
 import com.reloadly.devops.request.dtos.PersonalInfoDTO;
 import com.reloadly.devops.request.dtos.UpdateBalanceDTO;
 import com.reloadly.devops.response.dtos.CreatedAccountDTO;
 import com.reloadly.devops.response.dtos.OauthDTO;
 import com.reloadly.devops.response.dtos.ResponseDTO;
 import com.reloadly.devops.response.dtos.UpdatedAccountDTO;
+import com.reloadly.devops.services.NotificationService;
 import com.reloadly.devops.services.UserService;
 import com.reloadly.devops.transformers.ConverterUtil;
 import com.reloadly.devops.utilities.AccountCreationUtil;
 import com.reloadly.devops.utilities.ExternalCalls;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import static com.reloadly.devops.constants.ResponseMessages.*;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 	
-	@Autowired
-	private ConverterUtil converterUtil;
-	@Autowired
-	private UserRepo userRepo;
-	@Autowired
-	private AccountDetailsRepo accountDetailsRepo;
-	@Autowired
-	private ContactInfoRepo contactInfoRepo;
-	@Autowired
-	private PersonalInfoRepo personalInfoRepo;
-	@Autowired
-	private AddressRepo addressRepo;
-	@Autowired
-	private AccountCreationUtil accountCreationUtil;
-	@Autowired
-	private BCryptPasswordEncoder encoder;
-	@Autowired
-	private ExternalCalls extCalls;
+	private final ConverterUtil converterUtil;
+	private final UserRepo userRepo;
+	private final AccountDetailsRepo accountDetailsRepo;
+	private final ContactInfoRepo contactInfoRepo;
+	private final PersonalInfoRepo personalInfoRepo;
+	private final AddressRepo addressRepo;
+	private final AccountCreationUtil accountCreationUtil;
+	private final BCryptPasswordEncoder encoder;
+	private final ExternalCalls extCalls;
+	private final NotificationService notification;
 
 	@Override
 	@Transactional
 	public ResponseDTO<CreatedAccountDTO> createAccount(AccountOpeningDTO accountOpeningDTO) {
-		
+				
 		log.info("--->> Commencing account creation process");
 		User user = converterUtil.conv_AccountOpeningDTO_User(accountOpeningDTO);
 		user = userRepo.save(user);
@@ -95,6 +94,17 @@ public class UserServiceImpl implements UserService {
 				.accountType(accountDetails.getAccountType())
 				.accountBalance(accountDetails.getBalance())
 				.build();
+		
+		AccountCreationNotificationDTO accountCreationNotificationDTO = new AccountCreationNotificationDTO();
+		accountCreationNotificationDTO.setNotificationType(SIGNUP);
+		accountCreationNotificationDTO.setCreatedOn(new Date());
+		accountCreationNotificationDTO.setFirstname(personalInfo.getFirstName());
+		accountCreationNotificationDTO.setUsername(user.getUsername());
+		accountCreationNotificationDTO.setInitialBalance(accountDetails.getBalance());
+		accountCreationNotificationDTO.setAccountNumber(accountNumber);
+		accountCreationNotificationDTO.setAccountType(accountDetails.getAccountType());
+
+		notification.notifyUser(accountCreationNotificationDTO);
 		
 		return new ResponseDTO<>(SUCCESSFUL.getCode(), SUCCESSFUL.getMessage(), createdAccountDTO);
 	}
@@ -128,9 +138,10 @@ public class UserServiceImpl implements UserService {
 	public ResponseDTO<UpdatedAccountDTO> updateAccount(UpdateBalanceDTO updateBalanceDTO) {
 		UpdatedAccountDTO updatedAccountDTO = new UpdatedAccountDTO();
 		
-		AccountDetails accountDetails = accountDetailsRepo.findByAccountNumber(updateBalanceDTO.getAccountNumber()).get();
+		AccountDetails accountDetails = accountDetailsRepo.findByAccountNumber(updateBalanceDTO.getAccountNumber())
+				.orElseThrow(() -> new AppException("Account not found exception"));
 		accountDetails.setBalance(updateBalanceDTO.getAmount());
-		accountDetails = accountDetailsRepo.save(accountDetails);
+		accountDetailsRepo.save(accountDetails);
 		
 		updatedAccountDTO.setUsername(accountDetails.getUser().getUsername());
 		updatedAccountDTO.setFirstName(accountDetails.getUser().getPersonalInfo().getFirstName());
@@ -141,6 +152,9 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public ResponseDTO<OauthDTO> login(LoginDetailsDTO loginDetailsDTO)
 	{
+		LoginNotificationDTO loginNotificationDTO = new LoginNotificationDTO();
+		loginNotificationDTO.setNotificationType(LOGIN);
+		
 		log.info("---->>> Login process commences");
 		User user = userRepo.findByUsername(loginDetailsDTO.getUsername())
 				.orElseThrow(() -> new AppException("Username does not exist"));
@@ -154,6 +168,13 @@ public class UserServiceImpl implements UserService {
 		{
 			throw new AppException("User has not been activated");
 		}
+		
+		loginNotificationDTO.setCreatedOn(new Date());
+		loginNotificationDTO.setFirstname(user.getPersonalInfo().getFirstName());
+		loginNotificationDTO.setUsername(user.getUsername());
+		loginNotificationDTO.setLocation(loginDetailsDTO.getLocation());
+
+		notification.notifyUser(loginNotificationDTO);
 		
 		return new ResponseDTO<>(SUCCESSFUL.getCode(), SUCCESSFUL.getMessage(), 
 				extCalls.generateAuthServeTokenPasswordGrantType(loginDetailsDTO.getUsername(), loginDetailsDTO.getPassword()));
